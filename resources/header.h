@@ -7,32 +7,24 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include "../resources/aes.h"
 
 #define SLOTS_SIZE 5
-#define EMPTY_ID 0
-#define FULL_ID 1
-#define MUTEX_ID 2
 #define NSEM_SIZE 3
 #define STRING_SIZE 30
-#define SHM_KEY 91
+#define SHM_KEY 9191
 #define SEM_KEY "."
+#define CLEAR_SCREEN_ANSI "\e[1;1H\e[2J"
 
-static struct sembuf downEmpty = { EMPTY_ID, -1, 0 };
-static struct sembuf upEmpty = { EMPTY_ID, 1, 0 };
-static struct sembuf upFull = { FULL_ID, 1, 0 };
-static struct sembuf downFull = { FULL_ID, -1, 0 };
-static struct sembuf downMutex = { MUTEX_ID, -1, 0 };
-static struct sembuf upMutex = { MUTEX_ID, 1, 0 };
 
+int8_t enc_key[]    = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
 char *create_shared_mem_buffer();
 int create_semaphore_set();
 //int get_buffer_size(char *sbuff);
-//void clear_buffer(char *sbuf);
-void debug_buffer(char *sbuff);
+void clear_buffer(char *sbuff,long size);
+void debug_buffer(char *sbuff, int decrypt);
 
-/**
- * returns current size of shared buffer
- *
+/*
 int get_buffer_size(char **sbuff) {
   int i = 0;
   int counter = 0;
@@ -44,25 +36,57 @@ int get_buffer_size(char **sbuff) {
   return counter;
 }*/
 
-void debug_buffer(char *sbuff) {
-  int i = 0;
-	printf("MEMORY CONTENTS\n--------\n");
-  for (i = 0; i < SLOTS_SIZE*STRING_SIZE; i++) {
-		if (i%STRING_SIZE==0) printf("\n%d. ",i/STRING_SIZE);
-		if (sbuff[i]!='\n') printf("%c",sbuff[i]);
+void decryptANDprint(int8_t *word){
+	int8_t computed_plain[STRING_SIZE];
+	if (strlen((char*)word)>2){
+		aes128_dec(word,computed_plain);
+		printf("-> %s",computed_plain);
+	}
+	printf("\n");
+}
+
+void debug_buffer(char *sbuff, int decrypt) {
+	int i = 0,c=0;
+	aes128_load_key(enc_key);
+	int8_t word[STRING_SIZE];
+	printf(CLEAR_SCREEN_ANSI);
+	if (decrypt==1)
+		printf("BOB CAN SEE MEMORY CONTENTS (DECRYPTED):\n--------\n");
+	else
+		printf("EVE CAN SEE MEMORY CONTENTS:\n--------\n");
+  	for (i = 0; i < SLOTS_SIZE*STRING_SIZE; i++) {
+		if (i%STRING_SIZE==0) 
+		{
+			if (i!=0){
+				if (decrypt)
+					decryptANDprint(word);
+				else
+					printf("%s\n",word);
+			}
+			printf("%d. ",i/STRING_SIZE);
+			c=0;
+			clear_buffer((char *)word,STRING_SIZE);
+		}
+		word[c]=sbuff[i];
+		if (i/STRING_SIZE==SLOTS_SIZE-1){
+			if (decrypt==1){
+				if ((i+1)%STRING_SIZE==0)
+					decryptANDprint(word);
+			}else{
+				if (word[c]!='\0')
+					printf("%c",word[c]);
+			}
+		}
+		c++;
   }
   printf("\n--------\n");
 }
 
-/**
- * returns a pointer to a shared memory buffer that the
- * producer can write to.
- */
+
 char *create_shared_mem_buffer() {	
 	char *shmaddr=NULL;
-	long size=SLOTS_SIZE*STRING_SIZE; /* buffer address */
   	key_t key = SHM_KEY; /* use key to access a shared memory segment */
-  	int shmid = shmget(key, size, IPC_CREAT | SHM_R | SHM_W); /* give create, read and write access */
+  	int shmid = shmget(key, SLOTS_SIZE*STRING_SIZE, IPC_CREAT | SHM_R | SHM_W); /* give create, read and write access */
   	if (errno > 0) {
     	printf("failed to create shared memory segment: %d\n",errno);
     	exit (EXIT_FAILURE);
@@ -72,47 +96,12 @@ char *create_shared_mem_buffer() {
   	  printf ("failed to attach to shared memory segment: %d\n",errno);
   	  exit (EXIT_FAILURE);
   	}
-  	// clean out garbage memory in shared memory
   	return shmaddr;
 }
 
-/**
- * only used in the producer to clean out garbage memory when
- * constructing initial buffer.
- *
-void clear_buffer(char **sbuff) {
+void clear_buffer(char *sbuff,long size) {
   int i = 0;
-  for (i = 0; i < BUFFER_SIZE; ++i) sbuff[i] = 0x00;
-}*/
-
-/**
- * create FULL and EMPTY semaphores
- */
-int create_semaphore_set() {
-  key_t key = ftok(SEM_KEY, 'E');
-  
-  int semid = semget(key, NSEM_SIZE, 0600 | IPC_CREAT);
-  if (errno > 0) {
-    perror("failed to create semaphore array");
-    exit (EXIT_FAILURE);
-  } 
-
-  semctl(semid, FULL_ID, SETVAL, 0);
-  if (errno > 0) {
-    perror("failed to set FULL semaphore");
-    exit (EXIT_FAILURE);
-  }
-
-  semctl(semid, EMPTY_ID, SETVAL, SLOTS_SIZE);
-  if (errno > 0) {
-    perror("failed to set EMPTY sempahore");
-    exit (EXIT_FAILURE);
-  }
-
-  semctl(semid, MUTEX_ID, SETVAL, 1);
-  if (errno > 0) {
-    perror("failed to create mutex");
-  }
-
-  return semid;
+  for (i = 0; i < size; ++i) 
+		sbuff[i] = 0x00;
 }
+
