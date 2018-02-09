@@ -7,6 +7,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <openssl/conf.h>
+#include <openssl/evp.h>
+#include <openssl/err.h>
 #include "../resources/aes.h"
 
 #define SLOTS_SIZE 5
@@ -23,7 +26,7 @@ int create_semaphore_set();
 //int get_buffer_size(char *sbuff);
 void clear_buffer(char *sbuff,long size);
 void debug_buffer(char *sbuff, int decrypt);
-
+void print_hex(unsigned char *, size_t);
 /*
 int get_buffer_size(char **sbuff) {
   int i = 0;
@@ -36,11 +39,30 @@ int get_buffer_size(char **sbuff) {
   return counter;
 }*/
 
+void
+print_hex(unsigned char *data, size_t len)
+{
+	size_t i;
+
+	if (!data)
+		printf("NULL data\n");
+	else {
+		for (i = 0; i < len; i++) {
+			//if (!(i % 16) && (i != 0))
+			//	printf("\n");
+			printf("%02X ", data[i]);
+		}
+		printf("\n");
+	}
+}
+
 void decryptANDprint(int8_t *word){
 	int8_t computed_plain[STRING_SIZE];
 	if (strlen((char*)word)>2){
 		aes128_dec(word,computed_plain);
-		printf("-> %s",computed_plain);
+		//print_hex((unsigned char *)computed_plain, STRING_SIZE);
+		//printf("-> {%s}",computed_plain);
+		BIO_dump_fp (stdout, (const char *)computed_plain, sizeof(word));
 	}
 	printf("\n");
 }
@@ -61,7 +83,9 @@ void debug_buffer(char *sbuff, int decrypt) {
 				if (decrypt)
 					decryptANDprint(word);
 				else
-					printf("%s\n",word);
+					//printf("%s\n",word);
+					BIO_dump_fp (stdout, (const char *)word, sizeof(word));
+//					print_hex((unsigned char *)word, STRING_SIZE);
 			}
 			printf("%d. ",i/STRING_SIZE);
 			c=0;
@@ -74,7 +98,8 @@ void debug_buffer(char *sbuff, int decrypt) {
 					decryptANDprint(word);
 			}else{
 				if (word[c]!='\0')
-					printf("%c",word[c]);
+					//printf("%c",word[c]);
+					printf("%02X ", word[c]);
 			}
 		}
 		c++;
