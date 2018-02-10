@@ -24,8 +24,8 @@ cleanall: clean
 
 install: .tar .bld
 
-.bld:
-	sh install.sh
+build:
+	sh build.sh
 
 populator:
 	ruby makePopulator.rb

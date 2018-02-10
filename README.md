@@ -1,13 +1,13 @@
 # memENC demo
 
-###HowTo build
+### HowTo build
 
-- `sh install.sh`
+- `make build`
 - `make`
 - `ruby patch.rb`
 
-###HowTo demo
+### HowTo demo
 
-- `sh eve.sh` .I memory snooping Eve in terminal two. Eve can cryo-freeze RAM (cold boot) at any time retrieving all memory contents
-- `./sqlite3 .I` in-memory database in terminal one
-- `.read populate.sql` .I from inside sqlite2 
+- `sh eve.sh` Memory snooping Eve in terminal two. Eve can cryo-freeze RAM (cold boot) at any time and retrieve all  memory contents
+- `./sqlite3` in-memory database in terminal one
+- `.read populate.sql` from inside sqlite2 cl
