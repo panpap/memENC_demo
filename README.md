@@ -6,11 +6,11 @@ sh install.sh
 
 HowTo run
 -----------------
-make
-ruby patch.rb
+- make
+- ruby patch.rb
 
 HowTo demo
 -----------------
-./sqlite3 (in terminal one)
-sh eve.sh (in terminal two)
-sh populator.sh
+- ./sqlite3 (in terminal one)
+- sh eve.sh (in terminal two)
+- sh populator.sh
