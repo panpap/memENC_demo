@@ -1,23 +1,18 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
-#include <sys/sem.h>
 #include <sys/shm.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
+#include <stdint.h>
 #include <errno.h>
-#include <openssl/conf.h>
-#include <openssl/evp.h>
-#include <openssl/err.h>
 #include "aes.h"
 
 #define SLOTS_SIZE 5
-#define NSEM_SIZE 3
 #define STRING_SIZE 30
 #define SHM_KEY 13424242
-#define SEM_KEY "."
 #define CLEAR_SCREEN_ANSI "\e[1;1H\e[2J"
 
 
@@ -30,6 +25,7 @@ void debug_buffer(char *sbuff, int decrypt);
 void print_hex(unsigned char *, size_t);
 char *readCmd(const char *);
 char *saveVal(char *,char *);
+void exitNicely(char *);
 /*
 int get_buffer_size(char **sbuff) {
   int i = 0;
@@ -42,6 +38,11 @@ int get_buffer_size(char **sbuff) {
   return counter;
 }*/
 
+void exitNicely(char *buffer){
+	printf("memenc closed\n");
+	shmdt(buffer);
+}
+
 char *readCmd(const char *line){
 	char s[256], s2[256];
 	strcpy(s, line);
@@ -49,18 +50,15 @@ char *readCmd(const char *line){
 	char* cmd = strtok(s, " ");
 	if (strcmp(cmd,"insert")!=0)
 		return NULL;
-	printf("readCmd ->$ %s\n",line);//memenc
 	strtok(s2, "\"");
 	char* value = strtok(NULL, "\""); //get second part
 	return strdup(value);
 }
 
 char *saveVal(char *plain,char *shared_buffer){//memenc
-	int8_t computed_cipher[STRING_SIZE];
-	time_t t;int c=0;
-	srand((unsigned) time(&t));
+	int8_t computed_cipher[STRING_SIZE];int c=0;
 	int pos=rand()%SLOTS_SIZE;
-printf("%d\n",pos);
+printf("%s %d\n",plain,pos);
 	if (shared_buffer==NULL)
 		shared_buffer = create_shared_mem_buffer();
 	aes128_load_key(enc_key);
@@ -72,7 +70,7 @@ printf("%d\n",pos);
 	return shared_buffer;
 }
 
-void
+/*void
 print_hex(unsigned char *data, size_t len)
 {
 	size_t i;
@@ -87,7 +85,7 @@ print_hex(unsigned char *data, size_t len)
 		}
 		printf("\n");
 	}
-}
+}*/
 
 void decryptANDprint(int8_t *word){
 	int8_t computed_plain[STRING_SIZE];
@@ -116,7 +114,6 @@ void debug_buffer(char *sbuff, int decrypt) {
 				if (decrypt)
 					decryptANDprint(word);
 				else
-					//printf("%s\n",word);
 					BIO_dump_fp (stdout, (const char *)word, sizeof(word));
 //					print_hex((unsigned char *)word, STRING_SIZE);
 			}
@@ -132,7 +129,7 @@ void debug_buffer(char *sbuff, int decrypt) {
 			}else{
 				if (word[c]!='\0')
 					//printf("%c",word[c]);
-					printf("%02X ", word[c]);
+					printf("%02X [%d]", word[c],c);
 			}
 		}
 		c++;
@@ -143,19 +140,17 @@ void debug_buffer(char *sbuff, int decrypt) {
 
 char *create_shared_mem_buffer() {	
 	char *shmaddr=NULL;
+    int shmid;
   	key_t key = SHM_KEY; /* use key to access a shared memory segment */
-printf("SHM_KEY: %d\n",key);
-  	int shmid = shmget(key, SLOTS_SIZE*STRING_SIZE, IPC_CREAT | SHM_R | SHM_W); /* give create, read and write access */
-printf("dadada %d\n",shmid);
-  	if (errno > 0) {
-    	printf("failed to create shared memory segment: %d\n",errno);
-    	exit (EXIT_FAILURE);
-  	}
-  	shmaddr = (char*)shmat(shmid, NULL, 0);
-  	if (errno > 0) {
-  	  printf ("failed to attach to shared memory segment: %d\n",errno);
-  	  exit (EXIT_FAILURE);
-  	}
+ 	/* give create, read and write access*/
+	if ((shmid = shmget(key, SLOTS_SIZE*STRING_SIZE, IPC_CREAT | 0666)) < 0) {
+        perror("shmget");
+        exit(1);
+    } 
+    if ((shmaddr = shmat(shmid, NULL, 0)) == (char *) -1) {
+        perror("shmat");
+        exit(1);
+    }
   	return shmaddr;
 }
 

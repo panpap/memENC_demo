@@ -1,4 +1,4 @@
-#include "../resources/header.h"
+#include "header.h"
 
 char *plainVal(char plain[],char *shared_buffer) {
 	time_t t;

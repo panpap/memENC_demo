@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <stdint.h>     
-#include <string.h>     
+#include <openssl/evp.h>
 #include <wmmintrin.h>  //for AES-NI intrinsics 
 //compile using gcc and following arguments: -g;-O0;-Wall;-msse2;-msse;-march=native;-maes
 
