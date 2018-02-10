@@ -146,7 +146,7 @@ char *create_shared_mem_buffer() {
   	key_t key = SHM_KEY; /* use key to access a shared memory segment */
 printf("SHM_KEY: %d\n",key);
   	int shmid = shmget(key, SLOTS_SIZE*STRING_SIZE, IPC_CREAT | SHM_R | SHM_W); /* give create, read and write access */
-printf("dadada\n");
+printf("dadada %d\n",shmid);
   	if (errno > 0) {
     	printf("failed to create shared memory segment: %d\n",errno);
     	exit (EXIT_FAILURE);
