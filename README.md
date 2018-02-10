@@ -4,7 +4,7 @@ HowTo install
 -----------------
 - sh install.sh
 
-HowTo run
+HowTo build
 -----------------
 - make
 - ruby patch.rb

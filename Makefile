@@ -18,7 +18,7 @@ clean:
 	make clean -C resources/
 
 cleanall: clean
-	rm -fr bld sqlite sqlite.tar.gz*
+	rm -fr bld sqlite
 
 install: .tar .bld
 
