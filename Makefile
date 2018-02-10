@@ -8,12 +8,8 @@ sqlite3: sqlite3.o  shell.o memEnc.o
 sqlite3.o:  ./bld/sqlite3.c  ./bld/sqlite3.h
 	gcc $(FLAGS) -c ./bld/sqlite3.c -lpthread -ldl -o  ./bld/sqlite3.o
 
-shell.o:  ./bld/shell.c resources/header.h resources/aes.h
+shell.o:  ./bld/shell.c resources/header.h resources/memenc.c
 	gcc $(FLAGS) -I./resources -c ./bld/shell.c -lpthread -o  ./bld/shell.o 
-
-traced: sqlite3.o  shell.o
-	gcc $(FLAGS) -o trace.o resources/trace.c
-	gcc $(FLAGS) -rdynamic  -finstrument-functions ./bld/sqlite3.o  trace.o ./bld/shell.o -lpthread -ldl -o sqlite3
 
 clean:
 	rm -f sqlite3 *.csv *.db *.o install eve.sh bob.sh
