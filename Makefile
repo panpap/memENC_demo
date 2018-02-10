@@ -1,17 +1,19 @@
+FLAGS=-g -O0 -Wall -msse2 -msse -march=native -maes
+
 all: monitor sqlite3
 
 sqlite3: sqlite3.o  shell.o 
-	gcc -g -rdynamic  -finstrument-functions ./bld/sqlite3.o ./bld/shell.o -lpthread -ldl -o sqlite3
+	gcc $(FLAGS) -rdynamic -finstrument-functions ./bld/sqlite3.o ./bld/shell.o -lpthread -ldl -o sqlite3  -lcrypto
 
 sqlite3.o:  ./bld/sqlite3.c  ./bld/sqlite3.h
-	gcc -g -rdynamic -finstrument-functions -c -O0 -Wall -msse2 -msse -march=native -maes ./bld/sqlite3.c -lpthread -ldl -o  ./bld/sqlite3.o
+	gcc $(FLAGS) -c ./bld/sqlite3.c -lpthread -ldl -o  ./bld/sqlite3.o
 
-shell.o:  ./bld/shell.c
-	gcc -g -rdynamic -finstrument-functions -c  ./bld/shell.c -lpthread -o  ./bld/shell.o
+shell.o:  ./bld/shell.c resources/header.h resources/aes.h
+	gcc $(FLAGS) -I./resources -c ./bld/shell.c -lpthread -o  ./bld/shell.o 
 
 traced: sqlite3.o  shell.o
-	gcc -c -o trace.o resources/trace.c
-	gcc -g -rdynamic  -finstrument-functions ./bld/sqlite3.o  trace.o ./bld/shell.o -lpthread -ldl -o sqlite3
+	gcc $(FLAGS) -o trace.o resources/trace.c
+	gcc $(FLAGS) -rdynamic  -finstrument-functions ./bld/sqlite3.o  trace.o ./bld/shell.o -lpthread -ldl -o sqlite3
 
 clean:
 	rm -f sqlite3 *.csv *.db *.o install eve.sh bob.sh

@@ -11,12 +11,12 @@
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
-#include "../resources/aes.h"
+#include "aes.h"
 
 #define SLOTS_SIZE 5
 #define NSEM_SIZE 3
 #define STRING_SIZE 30
-#define SHM_KEY 9190
+#define SHM_KEY 13424242
 #define SEM_KEY "."
 #define CLEAR_SCREEN_ANSI "\e[1;1H\e[2J"
 
@@ -28,6 +28,8 @@ int create_semaphore_set();
 void clear_buffer(char *sbuff,long size);
 void debug_buffer(char *sbuff, int decrypt);
 void print_hex(unsigned char *, size_t);
+char *readCmd(const char *);
+char *saveVal(char *,char *);
 /*
 int get_buffer_size(char **sbuff) {
   int i = 0;
@@ -39,6 +41,36 @@ int get_buffer_size(char **sbuff) {
   }
   return counter;
 }*/
+
+char *readCmd(const char *line){
+	char s[256], s2[256];
+	strcpy(s, line);
+	strcpy(s2, line);
+	char* cmd = strtok(s, " ");
+	if (strcmp(cmd,"insert")!=0)
+		return NULL;
+	printf("readCmd ->$ %s\n",line);//memenc
+	strtok(s2, "\"");
+	char* value = strtok(NULL, "\""); //get second part
+	return strdup(value);
+}
+
+char *saveVal(char *plain,char *shared_buffer){//memenc
+	int8_t computed_cipher[STRING_SIZE];
+	time_t t;int c=0;
+	srand((unsigned) time(&t));
+	int pos=rand()%SLOTS_SIZE;
+printf("%d\n",pos);
+	if (shared_buffer==NULL)
+		shared_buffer = create_shared_mem_buffer();
+	aes128_load_key(enc_key);
+	aes128_enc((int8_t *)plain,computed_cipher);
+
+	for (c=pos*STRING_SIZE; c < pos*STRING_SIZE+strlen((char *)computed_cipher); c++)
+		shared_buffer[c]=computed_cipher[c-(pos*STRING_SIZE)];
+	printf("\nSECURELY INSERTED %d\n",pos);
+	return shared_buffer;
+}
 
 void
 print_hex(unsigned char *data, size_t len)
@@ -112,7 +144,9 @@ void debug_buffer(char *sbuff, int decrypt) {
 char *create_shared_mem_buffer() {	
 	char *shmaddr=NULL;
   	key_t key = SHM_KEY; /* use key to access a shared memory segment */
+printf("SHM_KEY: %d\n",key);
   	int shmid = shmget(key, SLOTS_SIZE*STRING_SIZE, IPC_CREAT | SHM_R | SHM_W); /* give create, read and write access */
+printf("dadada\n");
   	if (errno > 0) {
     	printf("failed to create shared memory segment: %d\n",errno);
     	exit (EXIT_FAILURE);

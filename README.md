@@ -1,11 +1,8 @@
 # memENC demo
 
-HowTo install
------------------
-- sh install.sh
-
 HowTo build
 -----------------
+- sh install.sh
 - make
 - ruby patch.rb
 
