@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include <errno.h>
 #include <openssl/conf.h>
 #include <openssl/evp.h>
@@ -15,7 +16,7 @@
 #define SLOTS_SIZE 5
 #define NSEM_SIZE 3
 #define STRING_SIZE 30
-#define SHM_KEY 9191
+#define SHM_KEY 9190
 #define SEM_KEY "."
 #define CLEAR_SCREEN_ANSI "\e[1;1H\e[2J"
 

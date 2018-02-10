@@ -10,7 +10,7 @@ shell.o:  ./bld/shell.c
 	gcc -g -rdynamic -finstrument-functions -c  ./bld/shell.c -lpthread -o  ./bld/shell.o
 
 traced: sqlite3.o  shell.o
-	gcc -c -o trace.o trace.c
+	gcc -c -o trace.o resources/trace.c
 	gcc -g -rdynamic  -finstrument-functions ./bld/sqlite3.o  trace.o ./bld/shell.o -lpthread -ldl -o sqlite3
 
 clean:
