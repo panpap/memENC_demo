@@ -14,7 +14,7 @@ traced: sqlite3.o  shell.o
 	gcc -g -rdynamic  -finstrument-functions ./bld/sqlite3.o  trace.o ./bld/shell.o -lpthread -ldl -o sqlite3
 
 clean:
-	rm -f sqlite3 *.csv *.db *.o install
+	rm -f sqlite3 *.csv *.db *.o install eve.sh bob.sh
 	make clean -C resources/
 
 cleanall: clean

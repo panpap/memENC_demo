@@ -11,6 +11,6 @@ HowTo run
 
 HowTo demo
 -----------------
-- ./sqlite3 (in terminal one)
-- sh eve.sh (in terminal two)
+- ./sqlite3 # in-memory database in terminal one
+- sh eve.sh # memory snooping Eve in terminal two. Eve can cryo-freeze RAM (cold boot) at any time retrieving all memory contents
 - sh populator.sh
