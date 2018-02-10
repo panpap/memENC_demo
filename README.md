@@ -2,7 +2,7 @@
 
 HowTo install
 -----------------
-sh install.sh
+- sh install.sh
 
 HowTo run
 -----------------
