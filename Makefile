@@ -33,7 +33,7 @@ populator:
 monitor:
 	make -C resources/
 	echo "./resources/monitor 0" > eve.sh
-	echo "./resources/monitor 1" > bob.sh
+	echo "./resources/monitor 1" > vanilla.sh
 	chmod 755 *.sh
 
 .tar:
