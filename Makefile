@@ -1,9 +1,9 @@
 FLAGS=-g -O0 -Wall -msse2 -msse -march=native -maes
 
-all: monitor sqlite3 populator
+all: monitor sqlite3 populateSQL
 
-sqlite3: sqlite3.o  shell.o 
-	gcc $(FLAGS) -rdynamic -finstrument-functions ./bld/sqlite3.o ./bld/shell.o -lpthread -ldl -o sqlite3  -lcrypto
+sqlite3: sqlite3.o  shell.o memEnc.o
+	gcc $(FLAGS) -rdynamic -finstrument-functions resources/memenc.o ./bld/sqlite3.o ./bld/shell.o -lpthread -ldl -o sqlite3  -lcrypto
 
 sqlite3.o:  ./bld/sqlite3.c  ./bld/sqlite3.h
 	gcc $(FLAGS) -c ./bld/sqlite3.c -lpthread -ldl -o  ./bld/sqlite3.o
@@ -27,7 +27,7 @@ install: .tar .bld
 build:
 	sh build.sh
 
-populator:
+populateSQL:
 	ruby makePopulator.rb
 
 monitor:
