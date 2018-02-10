@@ -1,8 +1,6 @@
 #include "header.h"
 
 char *plainVal(char plain[],char *shared_buffer) {
-	time_t t;
-	srand((unsigned) time(&t));
 	int pos=rand()%SLOTS_SIZE;
 printf("%d\n",pos);
 	if (shared_buffer==NULL)
@@ -10,14 +8,15 @@ printf("%d\n",pos);
 	int c=0;
    	for (c=pos*STRING_SIZE; c < pos*STRING_SIZE+strlen(plain); c++)
     	shared_buffer[c]=plain[c-(pos*STRING_SIZE)];
-	printf("\nINSERTED %d\n",pos);
+	printf("\nINSERTED %d %s\n",pos, plain);
 	return shared_buffer;
 }
 
 
 int main(int argc, const char *argv[])
 {
-	char plain[]="Hello World!",plain2[]="Panos";
+	time_t t;srand((unsigned) time(&t));
+	char plain[]="Hello World!\0",plain2[]="Panos";
 	char *shared_buffer=NULL;
 	if((argv[1]!=NULL) && (atoi(argv[1])==1)){
 		printf("SECURE STORE\n");

@@ -12,11 +12,11 @@
 #include <stdint.h>
 #include <errno.h>
 
-#define SLOTS_SIZE 5
-#define STRING_SIZE 30
+#define SLOTS_SIZE 20
+#define STRING_SIZE 16 //one AES block
 char *create_shared_mem_buffer();
 void clear_buffer(char *sbuff,long size);
-void debug_buffer(char *sbuff, int decrypt);
+void monitorMem(char *sbuff, int decrypt);
 char *readCmd(const char *);
 char *saveVal(char *,char *);
 void exitNicely(char *);

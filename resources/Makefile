@@ -8,10 +8,10 @@ populator: populator.o memEnc.o
 monitor: monitor.o  memEnc.o
 	gcc $(FLAGS) -o monitor memEnc.o monitor.o -lcrypto
 
-monitor.o: header.h memenc.c monitor.c
+monitor.o: header.h memEnc.c monitor.c
 	gcc $(FLAGS) -c monitor.c
 
-populator.o: header.h memenc.c populator.c
+populator.o: header.h memEnc.c populator.c
 	gcc $(FLAGS) -c populator.c
 
 memEnc.o: header.h memEnc.c

@@ -8,6 +8,7 @@ mark3="char **azCmd = 0;"
 rand="\ttime_t t;\n\tsrand((unsigned) time(&t)); //memenc"
 path="./bld/shell.c"
 system("mv "+path+" "+path+".bak")
+system("mv sqlite3 sqlite3_protected")
 fw=File.new(path,"w")
 count=1
 File.foreach(path+".bak"){|line|

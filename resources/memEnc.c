@@ -2,7 +2,7 @@
 #include <openssl/evp.h>
 #include <wmmintrin.h>  //for AES-NI intrinsics 
 
-#define SHM_KEY 13424242
+#define SHM_KEY 13424
 #define CLEAR_SCREEN_ANSI "\e[1;1H\e[2J"
 
 #define DO_ENC_BLOCK(m,k) \
@@ -62,10 +62,10 @@ char *readCmd(const char *line){
 	return strdup(value);
 }
 
+int nextPos=0;
 char *saveVal(char *plain,char *shared_buffer){//memenc
 	int8_t computed_cipher[STRING_SIZE];int c=0;
-	int pos=rand()%SLOTS_SIZE;
-printf("%s %d\n",plain,pos);
+	int pos=nextPos;//rand()%SLOTS_SIZE;
 	if (shared_buffer==NULL)
 		shared_buffer = create_shared_mem_buffer();
 	aes128_load_key(enc_key);
@@ -73,56 +73,53 @@ printf("%s %d\n",plain,pos);
 
 	for (c=pos*STRING_SIZE; c < pos*STRING_SIZE+strlen((char *)computed_cipher); c++)
 		shared_buffer[c]=computed_cipher[c-(pos*STRING_SIZE)];
-	printf("\nSECURELY INSERTED %d\n",pos);
+	nextPos++;
+	if (nextPos==SLOTS_SIZE)
+		nextPos=0;
 	return shared_buffer;
 }
 
 
-void decryptANDprint(int8_t *word){
+void decryptMe(int8_t *word){
 	int8_t computed_plain[STRING_SIZE];
 	if (strlen((char*)word)>2){
 		aes128_dec(word,computed_plain);
-		BIO_dump_fp (stdout, (const char *)computed_plain, sizeof(word));
+		BIO_dump_fp (stdout, (const char *)computed_plain, STRING_SIZE);
 	}
 	printf("\n");
 }
 
-void debug_buffer(char *sbuff, int decrypt) {
+void printer(int decEnc, int8_t *word, int c){
+	if (decEnc)
+		decryptMe(word);
+	else
+		BIO_dump_fp (stdout, (const char *)word, STRING_SIZE);
+}
+
+
+void monitorMem(char *sbuff, int decrypt) {
 	int i = 0,c=0;
 	aes128_load_key(enc_key);
 	int8_t word[STRING_SIZE];
 	printf(CLEAR_SCREEN_ANSI);
 	if (decrypt==1)
-		printf("BOB CAN SEE MEMORY CONTENTS (DECRYPTED):\n--------\n");
+		printf("ALICE CAN SEE MEMORY CONTENTS (DECRYPTED):\n--------\n");
 	else
 		printf("EVE CAN SEE MEMORY CONTENTS:\n--------\n");
   	for (i = 0; i < SLOTS_SIZE*STRING_SIZE; i++) {
 		if (i%STRING_SIZE==0) 
 		{
-			if (i!=0){
-				if (decrypt)
-					decryptANDprint(word);
-				else
-					BIO_dump_fp (stdout, (const char *)word, sizeof(word));
-			}
+			if (i>0)
+				printer(decrypt, word ,c);
 			printf("%d. ",i/STRING_SIZE);
 			c=0;
-			clear_buffer((char *)word,STRING_SIZE);
+		//	clear_buffer((char *)word,STRING_SIZE);
 		}
 		word[c]=sbuff[i];
-		if (i/STRING_SIZE==SLOTS_SIZE-1){
-			if (decrypt==1){
-				if ((i+1)%STRING_SIZE==0)
-					decryptANDprint(word);
-			}else{
-				if (word[c]!='\0')
-					//printf("%c",word[c]);
-					printf("%02X [%d]", word[c],c);
-			}
-		}
 		c++;
   }
-  printf("\n--------\n");
+	printer(decrypt, word ,c);
+  	printf("--------\n");
 }
 
 
@@ -141,10 +138,11 @@ char *create_shared_mem_buffer() {
   	return shmaddr;
 }
 
+
 void clear_buffer(char *sbuff,long size) {
   int i = 0;
   for (i = 0; i < size; ++i) 
-		sbuff[i] = 0x00;
+		sbuff[i] = 0xff;
 }
 
 

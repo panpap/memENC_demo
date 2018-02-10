@@ -6,4 +6,4 @@ for i in 0..count.to_i-1
 	fw.puts "insert into memenc_demo (name) values (\"John Doe#{i}\");"
 end
 fw.close
-puts "Successfully Produced #{count} J. Does"
+#puts "Successfully Produced #{count} J. Does"
