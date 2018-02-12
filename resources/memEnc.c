@@ -86,7 +86,7 @@ void decryptMe(int8_t *word){
 		aes128_dec(word,computed_plain);
 		BIO_dump_fp (stdout, (const char *)computed_plain, STRING_SIZE);
 	}
-	printf("\n");
+	//printf("\n");
 }
 
 void printer(int decEnc, int8_t *word, int c){
