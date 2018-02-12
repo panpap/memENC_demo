@@ -1,14 +1,19 @@
 head="#include \"../resources/header.h\"\t//memenc\n\n"
 mark0="static int shell_exec("
 mark1="rc = sqlite3_prepare_v2(db, zSql, -1, &pStmt, &zLeftover);"
-caller="\tif( SQLITE_OK == rc ){\n\t\tchar *val=readCmd(zSql);\n\t\tif (val!=NULL)\n\t\t\tmemenc_buf=saveVal(val,memenc_buf); //memenc\n\t}"
+if ARGV[0]=="1" 
+	mode="plainVal"
+else #memEnc protection
+	mode="saveVal"
+	print "APPLYING MEMORY ENCRYPTION PROTECTION PATCH..."
+end
+caller="\tif( SQLITE_OK == rc ){\n\t\tchar *val=readCmd(zSql);\n\t\tif (val!=NULL)\n\t\t\tmemenc_buf=#{mode}(val,memenc_buf); //memenc\n\t}"
 finishit="\t\texitNicely(memenc_buf);//memenc main"
 mark2="rc = process_input(&data, 0);"
 mark3="char **azCmd = 0;"
 rand="\ttime_t t;\n\tsrand((unsigned) time(&t)); //memenc"
 path="./bld/shell.c"
 system("mv "+path+" "+path+".bak")
-system("mv sqlite3 sqlite3_protected")
 fw=File.new(path,"w")
 count=1
 File.foreach(path+".bak"){|line|
@@ -34,4 +39,11 @@ File.foreach(path+".bak"){|line|
 	mod=false
 }
 fw.close
-system("make > /dev/null 2>&1")
+system("make sqlite3 > /dev/null 2>&1")
+if ARGV[0]=="1" 
+	system("mv sqlite3 sqlite3_vanilla")
+else	#memEnc protection
+	puts "DONE!"
+	system("mv sqlite3 sqlite3_protected")
+end
+system("cp "+path+".bak"+" "+path)

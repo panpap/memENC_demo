@@ -1,18 +1,5 @@
 #include "header.h"
 
-char *plainVal(char plain[],char *shared_buffer) {
-	int pos=rand()%SLOTS_SIZE;
-printf("%d\n",pos);
-	if (shared_buffer==NULL)
-  		shared_buffer = create_shared_mem_buffer();
-	int c=0;
-   	for (c=pos*STRING_SIZE; c < pos*STRING_SIZE+strlen(plain); c++)
-    	shared_buffer[c]=plain[c-(pos*STRING_SIZE)];
-	printf("\nINSERTED %d %s\n",pos, plain);
-	return shared_buffer;
-}
-
-
 int main(int argc, const char *argv[])
 {
 	time_t t;srand((unsigned) time(&t));

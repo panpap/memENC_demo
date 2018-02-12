@@ -63,7 +63,7 @@ char *readCmd(const char *line){
 }
 
 int nextPos=0;
-char *saveVal(char *plain,char *shared_buffer){//memenc
+char *saveVal(char *plain,char *shared_buffer){
 	int8_t computed_cipher[STRING_SIZE];int c=0;
 	int pos=nextPos;//rand()%SLOTS_SIZE;
 	if (shared_buffer==NULL)
@@ -79,6 +79,18 @@ char *saveVal(char *plain,char *shared_buffer){//memenc
 	return shared_buffer;
 }
 
+char *plainVal(char *plain,char *shared_buffer) {
+	int c=0;
+	int pos=nextPos;//rand()%SLOTS_SIZE;
+	if (shared_buffer==NULL)
+		shared_buffer = create_shared_mem_buffer();
+   	for (c=pos*STRING_SIZE; c < pos*STRING_SIZE+strlen(plain); c++)
+    	shared_buffer[c]=plain[c-(pos*STRING_SIZE)];
+	nextPos++;
+	if (nextPos==SLOTS_SIZE)
+		nextPos=0;
+	return shared_buffer;
+}
 
 void decryptMe(int8_t *word){
 	int8_t computed_plain[STRING_SIZE];

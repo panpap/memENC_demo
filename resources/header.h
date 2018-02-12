@@ -19,5 +19,6 @@ void clear_buffer(char *sbuff,long size);
 void monitorMem(char *sbuff, int decrypt);
 char *readCmd(const char *);
 char *saveVal(char *,char *);
+char *plainVal(char *,char *);
 void exitNicely(char *);
 #endif
