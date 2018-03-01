@@ -1,7 +1,7 @@
 # memENC demo
 Proof of Concept of the project: <br> 
 Panagiotis Papadopoulos, Giorgos Vasiliadis, Giorgos Christou, Evangelos Markatos, Sotiris Ioannidis, 
-"No Sugar but All the Taste! Memory Encryption Without Architectural Support", In Proceedings of European Symposium on Research in Computer Security (ESORICS 2017) <br> 
+**"No Sugar but All the Taste! Memory Encryption Without Architectural Support"**, In Proceedings of European Symposium on Research in Computer Security (ESORICS 2017) <br> 
 https://link.springer.com/chapter/10.1007/978-3-319-66399-9_20 <br> 
 
 ### Demo Scenario: 
