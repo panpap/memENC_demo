@@ -1,4 +1,8 @@
 # memENC demo
+Proof of Concept of the paper: 
+Panagiotis Papadopoulos, Giorgos Vasiliadis, Giorgos Christou, Evangelos Markatos, Sotiris Ioannidis, 
+"No Sugar but All the Taste! Memory Encryption Without Architectural Support", In Proceedings of European Symposium on Research in Computer Security (ESORICS 2017)
+https://link.springer.com/chapter/10.1007/978-3-319-66399-9_20
 
 ### Demo Scenario: 
 Judge Alice uses in-memory sqlite3 database in an untrusted VM to store the names of all witnesses in the murder Case No 3134.
